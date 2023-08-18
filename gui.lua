@@ -125,9 +125,9 @@ function main()
     elseif item.id == 'debug' then
       reaper.ShowConsoleMsg(pickle(SCPTable))
     elseif item.id == 'jump' then
-      Jump(item.slot, false)
+      Jump(item.slot)
     elseif item.id == 'jumpProject' then
-      Jump(0, true)
+      Jump(0)
     elseif item.id == 'copy' then
       CopySelectedItemsToSlot(item.slot)
     elseif item.id == 'delete' then

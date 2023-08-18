@@ -54,9 +54,8 @@ local function saveCursorPosition(slot)
 	end
 end
 
-function Jump(slot, toProject)
-	toProject = toProject or false
-	if (toProject == false) then
+function Jump(slot)
+	if (slot ~= 0) then
 		saveCursorPosition(GetCurrentSlot())
 		reaper.SetEditCurPos(SCPTable[slot][3], true, false)
 		reaper.SetProjExtState(0, ScriptName, "ActiveSCPSlot", slot)
