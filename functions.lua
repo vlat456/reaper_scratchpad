@@ -23,9 +23,9 @@ function AddScratchPad(name)
 	local slotStart, slotEnd = MakeTimeFromSlot(slot)
 	local markerName = ScratchMarkerPrefix .. ': ' .. name
 	local markerIdx = reaper.AddProjectMarker(0, true, slotStart, slotEnd, markerName, 0)
-	SCPTable[slot] = { name, markerIdx }
+	SCPTable[slot] = { name, markerIdx, slotStart }
 	WriteSCPTable()
-	JumpToScratchPad(slot)
+	Jump(slot)
 end
 
 function DeleteScratchPad(slot)
@@ -34,11 +34,39 @@ function DeleteScratchPad(slot)
 	WriteSCPTable()
 end
 
-function JumpToScratchPad(slot)
-	local slotStart, _ = MakeTimeFromSlot(slot)
-	reaper.SetProjExtState(0, ScriptName, "prevCurPos", reaper.GetCursorPosition())
-	reaper.SetEditCurPos(slotStart, true, false)
-	reaper.SetProjExtState(0, ScriptName, "SPA", 1)
+function GetCurrentSlot()
+	local __, currentSlot = reaper.GetProjExtState(0, ScriptName, "ActiveSCPSlot")
+	if (currentSlot == "") then currentSlot = 0 end
+	return tonumber(currentSlot)
+end
+
+-- slot 0 = project
+local function saveCursorPosition(slot)
+	local curPos = reaper.GetCursorPosition()
+	if (slot ~= 0) then
+		local currentSlotStart, currentSlotEnd = MakeTimeFromSlot(slot)
+		if (curPos >= currentSlotStart) and (curPos <= currentSlotEnd) then
+			SCPTable[slot][3] = curPos
+			WriteSCPTable()
+		end
+	else
+		reaper.SetProjExtState(0, ScriptName, "ProjectCursorPosition", curPos)
+	end
+end
+
+function Jump(slot, toProject)
+	toProject = toProject or false
+	if (toProject == false) then
+		saveCursorPosition(GetCurrentSlot())
+		reaper.SetEditCurPos(SCPTable[slot][3], true, false)
+		reaper.SetProjExtState(0, ScriptName, "ActiveSCPSlot", slot)
+	else
+		saveCursorPosition(GetCurrentSlot())
+		reaper.SetProjExtState(0, ScriptName, "ActiveSCPSlot", 0)
+		local __, curPos = reaper.GetProjExtState(0, ScriptName, "ProjectCursorPosition")
+		if curPos == "" then curPos = 0 else curPos = tonumber(curPos) end
+		reaper.SetEditCurPos(curPos, true, false)
+	end
 end
 
 function CheckSCPEmpty(tbl)
@@ -51,7 +79,7 @@ end
 function MakeTimeFromSlot(slot)
 	local slotStart = scratchPadTime + ((slot - 1) * slotLength)
 	local slotEnd = scratchPadTime + ((slot - 1) * slotLength) + slotLength
-	return slotStart, slotEnd
+	return slotStart, slotEnd - slotGap
 end
 
 -- https://gist.github.com/jrus/3197011
@@ -157,9 +185,9 @@ end
 
 function getSlotItemsTimeMax(slot)
 	local slotStart, slotEnd = MakeTimeFromSlot(slot)
-	local maxTime = 0
+	local maxTime = slotStart
 	for t = 0, reaper.CountTracks(0) - 1 do
-		local track = reaper.GetSelectedTrack(0, t)
+		local track = reaper.GetTrack(0, t)
 		for i = 0, reaper.CountTrackMediaItems(track) - 1 do
 			local item = reaper.GetTrackMediaItem(track, i)
 			local istart = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
@@ -171,27 +199,29 @@ function getSlotItemsTimeMax(slot)
 				end
 			end
 		end
-		return maxTime
 	end
+	return maxTime
 end
 
 function CopySelectedItemsToSlot(slot)
 	local items = GetSelectedItems()
 	local slotStart, _ = MakeTimeFromSlot(slot)
 	local minPosition = reaper.GetMediaItemInfo_Value(items[1], 'D_POSITION')
+	local distance = 0
 
 	for item = 1, #items do
 		local position = reaper.GetMediaItemInfo_Value(items[item], 'D_POSITION')
 		if (position <= minPosition) then minPosition = position end
 	end
-	local distance = slotStart - minPosition;
+	distance = getSlotItemsTimeMax(slot) - minPosition;
 
 	for item = 1, #items do
 		local track = reaper.GetMediaItemTrack(items[item])
 		local position = reaper.GetMediaItemInfo_Value(items[item], 'D_POSITION')
-
 		CopyMediaItemToTrack(items[item], track, position + distance)
 	end
+
+	reaper.SetEditCurPos(minPosition + distance, true, false)
 end
 
 --- https://forums.cockos.com/showthread.php?t=104319

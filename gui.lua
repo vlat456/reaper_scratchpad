@@ -99,6 +99,7 @@ function main()
   table.insert(menuItems, { 'Show debug', id = 'debug' })
   table.insert(menuItems, { 'New scratchpad', id = 'addWindow' })
   table.insert(menuItems, rtk.NativeMenu.static.SEPARATOR)
+  table.insert(menuItems, { 'Jump to project', id = 'jumpProject' })
   table.insert(menuItems, { 'Jump to scratchpad:', disabled = true })
   for i = 1, #jumpItems do
     table.insert(menuItems, jumpItems[i])
@@ -124,7 +125,9 @@ function main()
     elseif item.id == 'debug' then
       reaper.ShowConsoleMsg(pickle(SCPTable))
     elseif item.id == 'jump' then
-      JumpToScratchPad(item.slot)
+      Jump(item.slot, false)
+    elseif item.id == 'jumpProject' then
+      Jump(0, true)
     elseif item.id == 'copy' then
       CopySelectedItemsToSlot(item.slot)
     elseif item.id == 'delete' then

@@ -13,13 +13,6 @@ RTKinit()
 local res, isInScratchPad = reaper.GetProjExtState(0, ScriptName, "SPA")
 if (res == 0) then isInScratchPa4d = 0 else isInScratchPad = tonumber(isInScratchPad) end
 
-function JumpToScratchPad(slot)
-  local slotStart, _ = MakeTimeFromSlot(slot)
-  reaper.SetProjExtState(0, ScriptName, "prevCurPos", reaper.GetCursorPosition())
-  reaper.SetEditCurPos(slotStart, true, false)
-  reaper.SetProjExtState(0, ScriptName, "SPA", 1)
-end
-
 local function returnToProject()
   local res, prevCurPos = reaper.GetProjExtState(0, ScriptName, "prevCurPos")
   if (res == 0) then prevCurPos = 0 else prevCurPos = tonumber(prevCurPos) end
