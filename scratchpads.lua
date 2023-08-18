@@ -31,17 +31,17 @@ local function createScratchPad(markerSlot)
   reaper.AddProjectMarker(0, 0, scratchPadTime, 0, scratchPadName, markerSlot + 1)
 end
 
-local function isScratchpadAvail()
-  local num = reaper.CountProjectMarkers(0)
-  for i = 0, num - 1 do
-    local ret, isRegion, _startPos, endPos, name, index = reaper.EnumProjectMarkers(i)
-    res = string.match(scratchPadName, name)
-    if res ~= nil then
-      return true, num
-    end
-  end
-  return false, num
-end
+-- local function isScratchpadAvail()
+--   local num = reaper.CountProjectMarkers(0)
+--   for i = 0, num - 1 do
+--     local ret, isRegion, _startPos, endPos, ScratchPrefix .. name, index = reaper.EnumProjectMarkers(i)
+--     res = string.match(scratchPadName, name)
+--     if res ~= nil then
+--       return true, num
+--     end
+--   end
+--   return false, num
+-- end
 
 -- if isInScratchPad == 1 then
 --   returnToProject()

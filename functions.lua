@@ -20,15 +20,25 @@ function AddScratchPad(name)
 		if v == 0 then break end
 		slot = slot + 1
 	end
-	SCPTable[slot] = { name }
-	WriteSCPTable()
 	local slotStart, slotEnd = MakeTimeFromSlot(slot)
-	reaper.AddProjectMarker(0, 0, slotStart, 0, name)
+	local markerName = ScratchMarkerPrefix .. ': ' .. name
+	local markerIdx = reaper.AddProjectMarker(0, true, slotStart, slotEnd, markerName, 0)
+	SCPTable[slot] = { name, markerIdx }
+	WriteSCPTable()
+	JumpToScratchPad(slot)
 end
 
 function DeleteScratchPad(slot)
+	reaper.DeleteProjectMarker(0, SCPTable[slot][2], true)
 	SCPTable[slot] = 0
 	WriteSCPTable()
+end
+
+function JumpToScratchPad(slot)
+	local slotStart, _ = MakeTimeFromSlot(slot)
+	reaper.SetProjExtState(0, ScriptName, "prevCurPos", reaper.GetCursorPosition())
+	reaper.SetEditCurPos(slotStart, true, false)
+	reaper.SetProjExtState(0, ScriptName, "SPA", 1)
 end
 
 function CheckSCPEmpty(tbl)
