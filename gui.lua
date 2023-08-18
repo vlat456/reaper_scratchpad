@@ -105,6 +105,8 @@ function main()
   end
   table.insert(menuItems, rtk.NativeMenu.SEPARATOR)
   table.insert(menuItems,
+    { 'Copy selected to pad', disabled = not CheckSCPEmpty(SCPTable), submenu = makeMenuItems('copy') })
+  table.insert(menuItems,
     { 'Delete scratchpad', disabled = not CheckSCPEmpty(SCPTable), submenu = makeMenuItems('delete') })
   table.insert(menuItems, { 'Exit', id = 'exit' })
   menu:set(menuItems)
@@ -123,6 +125,8 @@ function main()
       reaper.ShowConsoleMsg(pickle(SCPTable))
     elseif item.id == 'jump' then
       JumpToScratchPad(item.slot)
+    elseif item.id == 'copy' then
+      CopySelectedItemsToSlot(item.slot)
     elseif item.id == 'delete' then
       DeleteScratchPad(item.slot)
     elseif item.id == 'exit' then

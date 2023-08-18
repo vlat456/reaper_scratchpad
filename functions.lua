@@ -154,3 +154,69 @@ function unpickle(s)
 	end
 	return tables[1]
 end
+
+function getSlotItemsTimeMax(slot)
+	local slotStart, slotEnd = MakeTimeFromSlot(slot)
+	local maxTime = 0
+	for t = 0, reaper.CountTracks(0) - 1 do
+		local track = reaper.GetSelectedTrack(0, t)
+		for i = 0, reaper.CountTrackMediaItems(track) - 1 do
+			local item = reaper.GetTrackMediaItem(track, i)
+			local istart = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+			local iend = istart + reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
+			if (istart >= slotStart and istart <= slotEnd) or (iend >= slotStart and iend <= slotEnd)
+			then
+				if iend >= maxTime then
+					maxTime = iend
+				end
+			end
+		end
+		return maxTime
+	end
+end
+
+function CopySelectedItemsToSlot(slot)
+	local items = GetSelectedItems()
+	local slotStart, _ = MakeTimeFromSlot(slot)
+	local minPosition = reaper.GetMediaItemInfo_Value(items[1], 'D_POSITION')
+
+	for item = 1, #items do
+		local position = reaper.GetMediaItemInfo_Value(items[item], 'D_POSITION')
+		if (position <= minPosition) then minPosition = position end
+	end
+	local distance = slotStart - minPosition;
+
+	for item = 1, #items do
+		local track = reaper.GetMediaItemTrack(items[item])
+		local position = reaper.GetMediaItemInfo_Value(items[item], 'D_POSITION')
+
+		CopyMediaItemToTrack(items[item], track, position + distance)
+	end
+end
+
+--- https://forums.cockos.com/showthread.php?t=104319
+--- Thx to daniellumertz
+function GetSelectedItems() -- Not used it is here in case you need
+	local list = {}
+	local num = reaper.CountSelectedMediaItems(0)
+	if num ~= 0 then
+		for i = 0, num - 1 do
+			list[i + 1] = reaper.GetSelectedMediaItem(0, i)
+		end
+	end
+	--reaper.Main_OnCommand(40289, 0)--Item: Unselect all items
+	return list
+end
+
+--- https://forums.cockos.com/showthread.php?t=104319
+--- Thx to amagalma
+function CopyMediaItemToTrack(item, track, position)
+	local _, chunk = reaper.GetItemStateChunk(item, "", false)
+	chunk = chunk:gsub("{.-}", "") -- Reaper auto-generates all GUIDs
+	local new_item = reaper.AddMediaItemToTrack(track)
+	reaper.PreventUIRefresh(1)
+	reaper.SetItemStateChunk(new_item, chunk, false)
+	reaper.SetMediaItemInfo_Value(new_item, "D_POSITION", position)
+	reaper.PreventUIRefresh(-1)
+	return new_item
+end
