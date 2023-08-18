@@ -1,34 +1,39 @@
 -- Quick and dirty Scratchpad implementation for Reaper
 -- This script is a subject of change in near future.
 
+local info = debug.getinfo(1, 'S');
+SCRIPT_PATH = info.source:match [[^@?(.*[\/])[^\/]-$]]
 
-local scratchPadName = "SCRATCH"
-local scriptName = "scratchpad"
-local scratchPadTime = 7200  -- seconds from start
+dofile(SCRIPT_PATH .. "functions.lua")
+dofile(SCRIPT_PATH .. "gui.lua")
 
-local res, isInScratchPad = reaper.GetProjExtState(0, scriptName, "SPA")
-if (res == 0) then isInScratchPad = 0 else isInScratchPad = tonumber(isInScratchPad) end
+ReadSCPTable()
+RTKinit()
 
-function jumpToScratchPad()
-  reaper.SetProjExtState(0, scriptName, "prevCurPos", reaper.GetCursorPosition())
-  reaper.SetEditCurPos(scratchPadTime, true, false)
-  reaper.SetProjExtState(0, scriptName, "SPA", 1)
+local res, isInScratchPad = reaper.GetProjExtState(0, ScriptName, "SPA")
+if (res == 0) then isInScratchPa4d = 0 else isInScratchPad = tonumber(isInScratchPad) end
+
+function JumpToScratchPad(slot)
+  local slotStart, _ = MakeTimeFromSlot(slot)
+  reaper.SetProjExtState(0, ScriptName, "prevCurPos", reaper.GetCursorPosition())
+  reaper.SetEditCurPos(slotStart, true, false)
+  reaper.SetProjExtState(0, ScriptName, "SPA", 1)
 end
 
-function returnToProject() 
-  local res, prevCurPos = reaper.GetProjExtState(0, scriptName, "prevCurPos")
+local function returnToProject()
+  local res, prevCurPos = reaper.GetProjExtState(0, ScriptName, "prevCurPos")
   if (res == 0) then prevCurPos = 0 else prevCurPos = tonumber(prevCurPos) end
-  reaper.SetProjExtState(0, scriptName, "SPA", 0)
+  reaper.SetProjExtState(0, ScriptName, "SPA", 0)
   reaper.SetEditCurPos(prevCurPos, true, false)
 end
 
-function createScratchPad(markerSlot) 
-   reaper.AddProjectMarker(0, 0, scratchPadTime, 0, scratchPadName, markerSlot + 1)
+local function createScratchPad(markerSlot)
+  reaper.AddProjectMarker(0, 0, scratchPadTime, 0, scratchPadName, markerSlot + 1)
 end
 
-function isScratchpadAvail() 
+local function isScratchpadAvail()
   local num = reaper.CountProjectMarkers(0)
-  for i = 0, num-1 do 
+  for i = 0, num - 1 do
     local ret, isRegion, _startPos, endPos, name, index = reaper.EnumProjectMarkers(i)
     res = string.match(scratchPadName, name)
     if res ~= nil then
@@ -38,18 +43,15 @@ function isScratchpadAvail()
   return false, num
 end
 
-
-if isInScratchPad == 1 then
-  returnToProject()
-  return
-else
-  local scratchAvail, markerSlot = isScratchpadAvail()
-  if scratchAvail == true then
-    jumpToScratchPad()
-  else
-    createScratchPad(markerSlot)
-    jumpToScratchPad()
-  end
-end
-
-
+-- if isInScratchPad == 1 then
+--   returnToProject()
+--   return
+-- else
+--   local scratchAvail, markerSlot = isScratchpadAvail()
+--   if scratchAvail == true then
+--     JumpToScratchPad()
+--   else
+--     createScratchPad(markerSlot)
+--     JumpToScratchPad()
+--   end
+-- end
