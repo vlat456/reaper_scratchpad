@@ -40,21 +40,38 @@ function GetCurrentSlot()
 	return tonumber(currentSlot)
 end
 
+local function isCursorInSlot(slot)
+	local curPos = reaper.GetCursorPosition()
+	local slotStart, slotEnd
+	if (slot ~= 0) then
+		slotStart, slotEnd = MakeTimeFromSlot(slot)
+	else
+		slotStart = 0
+		slotEnd = scratchPadTime
+	end
+	if (curPos >= slotStart) and (curPos <= slotEnd) then
+		return true
+	end
+	return false
+end
+
 -- slot 0 = project
 local function saveCursorPosition(slot)
 	local curPos = reaper.GetCursorPosition()
 	if (slot ~= 0) then
-		local currentSlotStart, currentSlotEnd = MakeTimeFromSlot(slot)
-		if (curPos >= currentSlotStart) and (curPos <= currentSlotEnd) then
+		if isCursorInSlot(slot) then
 			SCPTable[slot][3] = curPos
 			WriteSCPTable()
 		end
 	else
-		reaper.SetProjExtState(0, ScriptName, "ProjectCursorPosition", curPos)
+		if isCursorInSlot(slot) then
+			reaper.SetProjExtState(0, ScriptName, "ProjectCursorPosition", curPos)
+		end
 	end
 end
 
 function Jump(slot)
+	if (GetCurrentSlot() == slot) then return end
 	if (slot ~= 0) then
 		saveCursorPosition(GetCurrentSlot())
 		reaper.SetEditCurPos(SCPTable[slot][3], true, false)
