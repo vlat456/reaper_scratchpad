@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="vlat456 scripts" commit="b4bd580d6ce89c95fce93d83788852842cd4aa0e">
+<index version="1" name="vlat456 scripts" commit="1656ee0a60e1b26ecdf08c8ed3c696177c518a98">
   <category name="scratchpad">
     <reapack name="scratchpads.lua" type="script" desc="Quick and dirty Scratchpad implementation for Reaper">
       <version name="0.1a" author="vlat456" time="2023-08-19T17:58:32Z">
         <changelog><![CDATA[Initial alpha release]]></changelog>
         <source main="main">https://github.com/vlat456/reaper_stuff/raw/devel/scratchpad/scratchpads.lua</source>
+      </version>
+      <version name="0.11a" author="vlat456" time="2023-08-19T18:34:23Z">
+        <changelog><![CDATA[Initial alpha release]]></changelog>
+        <source main="main">https://github.com/vlat456/reaper_stuff/raw/devel/scratchpad/scratchpads.lua</source>
+        <source file="src/functions.lua">https://github.com/vlat456/reaper_stuff/raw/devel/scratchpad/src/functions.lua</source>
+        <source file="src/gui.lua">https://github.com/vlat456/reaper_stuff/raw/devel/scratchpad/src/gui.lua</source>
       </version>
     </reapack>
   </category>
