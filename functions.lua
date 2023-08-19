@@ -9,84 +9,103 @@ function WriteSCPTable()
 	reaper.SetProjExtState(0, ScriptName, "SCPTable", scratchPadStr)
 end
 
+function CreateSCPEntry(name, markerIdx, startTime, endTime, cursorPos, active)
+	return { name, markerIdx, startTime, endTime, cursorPos, active }
+end
+
 function ReadSCPTable()
+	local SCPTable = {}
 	local __, SCPTableStr = reaper.GetProjExtState(0, ScriptName, "SCPTable")
-	if (SCPTableStr == "") then SCPTable[1] = nil else SCPTable = unpickle(SCPTableStr) end
+	if (SCPTableStr == "") then -- create project entry
+		SCPTable[1] = CreateSCPEntry('Project', 'Project marker', 0, scratchPadTime, 0, true)
+	else
+		SCPTable = unpickle(SCPTableStr)
+	end
+	return SCPTable
 end
 
 function AddScratchPad(name)
-	local slot = 1
-	for k, v in ipairs(SCPTable) do
-		if v == 0 then break end
-		slot = slot + 1
+	local slot
+	for index, v in pairs(SCPTable) do -- look for first free slot
+		if v == 0 then
+			slot = index
+			break
+		end
+		slot = index + 1 -- if no free slot found
 	end
+
 	local slotStart, slotEnd = MakeTimeFromSlot(slot)
 	local markerName = ScratchMarkerPrefix .. ': ' .. name
 	local markerIdx = reaper.AddProjectMarker(0, true, slotStart, slotEnd, markerName, 0)
-	SCPTable[slot] = { name, markerIdx, slotStart }
+	SCPTable[slot] = CreateSCPEntry(name, markerIdx, slotStart, slotEnd, slotStart, false)
+	--SCPTable[slot] = { name, markerIdx, slotStart }
 	WriteSCPTable()
 	Jump(slot)
 end
 
 function DeleteScratchPad(slot)
+	if (slot == 1) then return end -- never delete first (project) slot
 	reaper.DeleteProjectMarker(0, SCPTable[slot][2], true)
 	SCPTable[slot] = 0
 	WriteSCPTable()
 end
 
 function GetCurrentSlot()
-	local __, currentSlot = reaper.GetProjExtState(0, ScriptName, "ActiveSCPSlot")
-	if (currentSlot == "") then currentSlot = 0 end
-	return tonumber(currentSlot)
+	for k, v in pairs(SCPTable) do
+		if v[6] == true then return k end
+	end
+	return 1 -- safety fallback, return project
 end
 
 local function isCursorInSlot(slot)
 	local curPos = reaper.GetCursorPosition()
 	local slotStart, slotEnd
-	if (slot ~= 0) then
-		slotStart, slotEnd = MakeTimeFromSlot(slot)
-	else
-		slotStart = 0
-		slotEnd = scratchPadTime
-	end
+	slotStart, slotEnd = MakeTimeFromSlot(slot)
 	if (curPos >= slotStart) and (curPos <= slotEnd) then
 		return true
 	end
 	return false
 end
 
--- slot 0 = project
 local function saveCursorPosition(slot)
 	local curPos = reaper.GetCursorPosition()
-	if (slot ~= 0) then
-		if isCursorInSlot(slot) then
-			SCPTable[slot][3] = curPos
-			WriteSCPTable()
-		end
-	else
-		if isCursorInSlot(slot) then
-			reaper.SetProjExtState(0, ScriptName, "ProjectCursorPosition", curPos)
-		end
+	if isCursorInSlot(slot) then
+		SCPTable[slot][5] = curPos
 	end
+	WriteSCPTable()
+	-- else
+	-- 	if isCursorInSlot(slot) then
+	-- 		reaper.SetProjExtState(0, ScriptName, "ProjectCursorPosition", curPos)
+	-- 	end
+	-- end
+end
+
+function SetActiveSlot(slot)
+	for _, v in pairs(SCPTable) do
+		v[6] = false -- unactivate everything
+	end
+	SCPTable[slot][6] = true
 end
 
 function Jump(slot)
 	if (GetCurrentSlot() == slot) then return end
-	if (slot ~= 0) then
-		saveCursorPosition(GetCurrentSlot())
-		reaper.SetEditCurPos(SCPTable[slot][3], true, false)
-		reaper.SetProjExtState(0, ScriptName, "ActiveSCPSlot", slot)
-	else
-		saveCursorPosition(GetCurrentSlot())
-		reaper.SetProjExtState(0, ScriptName, "ActiveSCPSlot", 0)
-		local __, curPos = reaper.GetProjExtState(0, ScriptName, "ProjectCursorPosition")
-		if curPos == "" then curPos = 0 else curPos = tonumber(curPos) end
-		reaper.SetEditCurPos(curPos, true, false)
-	end
+	saveCursorPosition(GetCurrentSlot())
+	reaper.SetEditCurPos(SCPTable[slot][5], true, false)
+	--reaper.SetProjExtState(0, ScriptName, "ActiveSCPSlot", slot)
+	SetActiveSlot(slot)
+	WriteSCPTable()
+
+	-- else
+	-- 	saveCursorPosition(GetCurrentSlot())
+	-- 	reaper.SetProjExtState(0, ScriptName, "ActiveSCPSlot", 0)
+	-- 	local __, curPos = reaper.GetProjExtState(0, ScriptName, "ProjectCursorPosition")
+	-- 	if curPos == "" then curPos = 0 else curPos = tonumber(curPos) end
+	-- 	reaper.SetEditCurPos(curPos, true, false)
+	-- end
 end
 
 function CheckSCPEmpty(tbl)
-	for _, v in ipairs(tbl) do
+	for _, v in pairs(tbl) do
 		if v ~= 0 then return true end
 	end
 	return false
@@ -220,7 +239,9 @@ function getSlotItemsTimeMax(slot)
 end
 
 function CopySelectedItemsToSlot(slot)
+	if (slot == GetCurrentSlot()) then return end
 	local items = GetSelectedItems()
+	if (items == {}) then return end
 	local slotStart, _ = MakeTimeFromSlot(slot)
 	local minPosition = reaper.GetMediaItemInfo_Value(items[1], 'D_POSITION')
 	local distance = 0

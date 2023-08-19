@@ -56,13 +56,11 @@ end
 
 local function makeMenuItems(action)
   local items = {}
-  local _slot = 1
   if #SCPTable ~= 0 then
-    for _, v in ipairs(SCPTable) do
+    for k, v in pairs(SCPTable) do
       if v ~= 0 then
-        table.insert(items, { v[1], slot = _slot, id = action })
+        table.insert(items, { v[1], slot = k, id = action })
       end
-      _slot = _slot + 1
     end
   end
   return items
@@ -99,7 +97,7 @@ function main()
   table.insert(menuItems, { 'Show debug', id = 'debug' })
   table.insert(menuItems, { 'New scratchpad', id = 'addWindow' })
   table.insert(menuItems, rtk.NativeMenu.static.SEPARATOR)
-  table.insert(menuItems, { 'Jump to project', id = 'jumpProject' })
+  ---table.insert(menuItems, { 'Jump to project', id = 'jumpProject' })
   table.insert(menuItems, { 'Jump to scratchpad:', disabled = true })
   for i = 1, #jumpItems do
     table.insert(menuItems, jumpItems[i])

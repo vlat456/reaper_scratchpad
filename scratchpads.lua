@@ -7,7 +7,7 @@ SCRIPT_PATH = info.source:match [[^@?(.*[\/])[^\/]-$]]
 dofile(SCRIPT_PATH .. "functions.lua")
 dofile(SCRIPT_PATH .. "gui.lua")
 
-ReadSCPTable()
+SCPTable = ReadSCPTable()
 RTKinit()
 
 local res, isInScratchPad = reaper.GetProjExtState(0, ScriptName, "SPA")
