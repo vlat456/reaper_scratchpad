@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="vlat456 scripts" commit="47bd43e8b8bb328270b8b1484d0948da3229bd8b">
+<index version="1" name="vlat456 scripts" commit="feaba03ab2e9b1275ea3ac969e8c5d16b7fdff85">
   <category name="scratchpad">
+    <reapack name="globals.lua" type="script">
+      <version name="0.1a" time="2023-08-19T18:11:23Z">
+        <source main="main">https://github.com/vlat456/reaper_stuff/raw/devel/scratchpad/globals.lua</source>
+      </version>
+    </reapack>
     <reapack name="scratchpads.lua" type="script" desc="Quick and dirty Scratchpad implementation for Reaper">
       <version name="0.1a" author="vlat456" time="2023-08-19T17:58:32Z">
         <changelog><![CDATA[Initial alpha release]]></changelog>
