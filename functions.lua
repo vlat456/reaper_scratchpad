@@ -38,6 +38,7 @@ function AddScratchPad(name)
 	local markerName = ScratchMarkerPrefix .. ': ' .. name
 	local markerIdx = reaper.AddProjectMarker(0, true, slotStart, slotEnd, markerName, 0)
 	SCPTable[slot] = CreateSCPEntry(name, markerIdx, slotStart, slotEnd, slotStart, false)
+	--SCPTable[slot] = { name, markerIdx, slotStart }
 	WriteSCPTable()
 	Jump(slot)
 end
@@ -78,7 +79,9 @@ end
 
 function SetActiveSlot(slot)
 	for _, v in pairs(SCPTable) do
-		v[6] = false -- unactivate everything
+		if v ~= 0 then
+			v[6] = false -- unactivate everything
+		end
 	end
 	SCPTable[slot][6] = true
 end
@@ -99,8 +102,8 @@ function CheckSCPEmpty(tbl)
 end
 
 function MakeTimeFromSlot(slot)
-	local slotStart = SCPTable[slot][3]
-	local slotEnd = SCPTable[slot][4] - slotGap
+	local slotStart = scratchPadTime + ((slot - 1) * slotLength)
+	local slotEnd = scratchPadTime + ((slot - 1) * slotLength) + slotLength
 	return slotStart, slotEnd - slotGap
 end
 
