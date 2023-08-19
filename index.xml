@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="vlat456 scripts" commit="79e7e133c5217eeb633ffd1b6ee251a9fe2ae65f">
+<index version="1" name="vlat456 scripts" commit="139ba50de9e04aa94232e625986866dd8640437c">
   <category name="scratchpad">
     <reapack name="scratchpads.lua" type="script" desc="Quick and dirty Scratchpad implementation for Reaper">
       <version name="0.1a" author="vlat456" time="2023-08-19T17:58:32Z">
@@ -11,6 +11,14 @@
         <source main="main">https://github.com/vlat456/reaper_stuff/raw/devel/scratchpad/scratchpads.lua</source>
         <source file="src/functions.lua">https://github.com/vlat456/reaper_stuff/raw/devel/scratchpad/src/functions.lua</source>
         <source file="src/gui.lua">https://github.com/vlat456/reaper_stuff/raw/devel/scratchpad/src/gui.lua</source>
+      </version>
+      <version name="0.111a" author="vlat456" time="2023-08-19T18:36:30Z">
+        <changelog><![CDATA[Initial alpha release]]></changelog>
+        <source main="main">https://github.com/vlat456/reaper_stuff/raw/devel/scratchpad/scratchpads.lua</source>
+        <source file="src/functions.lua">https://github.com/vlat456/reaper_stuff/raw/devel/scratchpad/src/functions.lua</source>
+        <source file="src/gui.lua">https://github.com/vlat456/reaper_stuff/raw/devel/scratchpad/src/gui.lua</source>
+        <source file="src/pickle.lua">https://github.com/vlat456/reaper_stuff/raw/devel/scratchpad/src/pickle.lua</source>
+        <source file="src/globals.lua">https://github.com/vlat456/reaper_stuff/raw/devel/scratchpad/src/globals.lua</source>
       </version>
     </reapack>
   </category>
