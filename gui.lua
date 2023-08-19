@@ -125,9 +125,10 @@ function main()
     elseif item.id == 'jump' then
       Jump(item.slot)
     elseif item.id == 'jumpProject' then
-      Jump(0)
+      Jump(1)
     elseif item.id == 'copy' then
       CopySelectedItemsToSlot(item.slot)
+      Jump(item.slot)
     elseif item.id == 'delete' then
       DeleteScratchPad(item.slot)
     elseif item.id == 'exit' then
