@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<index version="1" name="Vlat456 repository" commit="58a3e39ba95bd0f35846aa1f39aa4cb2574295e1">
+  <category name="Utils">
+    <reapack name="Scratchpad" type="script" desc="Scratchpad main">
+      <metadata>
+        <description>Scratchpad implementation</description>
+      </metadata>
+      <version name="1.0" author="vlat456" time="2021-01-04T23:30:32Z">
+        <source main="main">https://github.com/cfillion/reapack-repository-template/raw/58a3e39ba95bd0f35846aa1f39aa4cb2574295e1/Example/cfillion_Hello%20world.lua</source>
+      </version>
+    </reapack>
+  </category>
+  <metadata>
+    <description>Descr</description>
+  </metadata>
+</index>
