@@ -2,9 +2,6 @@
 -- @author vlat456
 -- @description Quick and dirty Scratchpad implementation for Reaper
 -- This script is a subject of change in near future.
--- @provides functions.lua
---           globals.lua
---           gui.lua
 -- @changelog Initial alpha release
 
 local info = debug.getinfo(1, 'S');
