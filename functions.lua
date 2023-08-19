@@ -31,14 +31,16 @@ function AddScratchPad(name)
 			slot = index
 			break
 		end
-		slot = index + 1 -- if no free slot found
+		-- POSSIBLE BUG
+		slot = index + 2 -- if no free slot found
 	end
 
-	local slotStart, slotEnd = MakeTimeFromSlot(slot)
+	local slotStart = scratchPadTime + ((slot - 1) * slotLength)
+	local slotEnd = scratchPadTime + ((slot - 1) * slotLength) + slotLength
 	local markerName = ScratchMarkerPrefix .. ': ' .. name
 	local markerIdx = reaper.AddProjectMarker(0, true, slotStart, slotEnd, markerName, 0)
 	SCPTable[slot] = CreateSCPEntry(name, markerIdx, slotStart, slotEnd, slotStart, false)
-	--SCPTable[slot] = { name, markerIdx, slotStart }
+
 	WriteSCPTable()
 	Jump(slot)
 end
@@ -47,6 +49,16 @@ function DeleteScratchPad(slot)
 	if (slot == 1) then return end -- never delete first (project) slot
 	reaper.DeleteProjectMarker(0, SCPTable[slot][2], true)
 	SCPTable[slot] = 0
+
+	local slots = 0
+	for _, v in pairs(SCPTable) do
+		if v ~= 0 then
+			slots = slots + 1
+		end
+	end
+	if slots == 1 then -- no slots
+		Jump(1)
+	end
 	WriteSCPTable()
 end
 
@@ -70,11 +82,11 @@ local function isCursorInSlot(slot)
 end
 
 local function saveCursorPosition(slot)
-	local curPos = reaper.GetCursorPosition()
-	if isCursorInSlot(slot) then
+	if (SCPTable[slot] ~= 0) then
+		local curPos = reaper.GetCursorPosition()
 		SCPTable[slot][5] = curPos
+		WriteSCPTable()
 	end
-	WriteSCPTable()
 end
 
 function SetActiveSlot(slot)
@@ -88,7 +100,9 @@ end
 
 function Jump(slot)
 	if (GetCurrentSlot() == slot) then return end
-	saveCursorPosition(GetCurrentSlot())
+	if (isCursorInSlot(GetCurrentSlot()) == true) then
+		saveCursorPosition(GetCurrentSlot())
+	end
 	reaper.SetEditCurPos(SCPTable[slot][5], true, false)
 	SetActiveSlot(slot)
 	WriteSCPTable()
@@ -102,8 +116,10 @@ function CheckSCPEmpty(tbl)
 end
 
 function MakeTimeFromSlot(slot)
-	local slotStart = scratchPadTime + ((slot - 1) * slotLength)
-	local slotEnd = scratchPadTime + ((slot - 1) * slotLength) + slotLength
+	--local slotStart = scratchPadTime + ((slot - 1) * slotLength)
+	--local slotEnd = scratchPadTime + ((slot - 1) * slotLength) + slotLength
+	local slotStart = SCPTable[slot][3]
+	local slotEnd = SCPTable[slot][4]
 	return slotStart, slotEnd - slotGap
 end
 
