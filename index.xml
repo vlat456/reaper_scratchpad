@@ -4,10 +4,10 @@
     <reapack name="scratchpads.lua" type="script" desc="Quick and dirty Scratchpad implementation for Reaper">
       <version name="0.1a" author="vlat456" time="2023-08-19T15:57:06Z">
         <changelog><![CDATA[Initial alpha release]]></changelog>
-        <source main="main">https://localhost/src/scratchpads.lua</source>
-        <source file="functions.lua">https://localhost/src/functions.lua</source>
-        <source file="globals.lua">https://localhost/src/globals.lua</source>
-        <source file="gui.lua">https://localhost/src/gui.lua</source>
+        <source main="main">https://github.com/vlat456/reaper_scratch/devel/main/src/scratchpads.lua</source>
+        <source file="functions.lua">https://github.com/vlat456/reaper_scratch/devel/main/src/functions.lua</source>
+        <source file="globals.lua">https://github.com/vlat456/reaper_scratch/devel/main/src/globals.lua</source>
+        <source file="gui.lua">https://github.com/vlat456/reaper_scratch/devel/main/src/gui.lua</source>
       </version>
     </reapack>
   </category>
