@@ -1,5 +1,8 @@
 -- @version 0.1a
-
+-- @author vlat456
+-- @description Quick and dirty Scratchpad implementation for Reaper
+-- @changelog Initial alpha release
+-- @tag devel
 
 local info = debug.getinfo(1, 'S');
 SCRIPT_PATH = info.source:match [[^@?(.*[\/])[^\/]-$]]
