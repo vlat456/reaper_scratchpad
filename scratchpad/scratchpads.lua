@@ -3,7 +3,7 @@
 -- @description Quick and dirty Scratchpad implementation for Reaper
 -- @changelog Initial alpha release
 -- @provides
---    functions.lua
+--    src/functions.lua
 
 local info = debug.getinfo(1, 'S');
 SCRIPT_PATH = info.source:match [[^@?(.*[\/])[^\/]-$]]
