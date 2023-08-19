@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="vlat456 scripts" commit="c4c6ed12a865bc667b72c31a61ce6e53301e9cdc">
+<index version="1" name="vlat456 scripts" commit="703bea1aea46f425a667e3f61f90b91ccdadfb4d">
   <category name="scratchpad">
     <reapack name="scratchpads.lua" type="script" desc="Quick and dirty Scratchpad implementation for Reaper">
       <version name="0.1a" author="vlat456" time="2023-08-19T17:58:32Z">
