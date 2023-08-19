@@ -1,4 +1,3 @@
--- @version 0.1a
 SCPTable = {}
 ScratchMarkerPrefix = "SCRATCH"
 
