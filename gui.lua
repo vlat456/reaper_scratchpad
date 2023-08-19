@@ -1,3 +1,5 @@
+-- @noindex
+
 dofile(SCRIPT_PATH .. "functions.lua")
 
 -- Loads rtk in the global scope, and, if missing, attempts to install using

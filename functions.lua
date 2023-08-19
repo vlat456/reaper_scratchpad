@@ -1,3 +1,5 @@
+-- @noindex
+
 dofile(SCRIPT_PATH .. "globals.lua")
 
 -- Setup package path locations to find rtk via ReaPack

@@ -1,3 +1,5 @@
+-- @noindex
+
 SCPTable = {}
 ScratchMarkerPrefix = "SCRATCH"
 
