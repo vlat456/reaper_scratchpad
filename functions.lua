@@ -4,13 +4,13 @@ dofile(SCRIPT_PATH .. "globals.lua")
 local entrypath = ({ reaper.get_action_context() })[2]:match('^.+[\\//]')
 package.path = string.format('%s/Scripts/rtk/1/?.lua;%s?.lua;', reaper.GetResourcePath(), entrypath)
 
+function CreateSCPEntry(name, markerIdx, startTime, endTime, cursorPos, active)
+	return { name, markerIdx, startTime, endTime, cursorPos, active }
+end
+
 function WriteSCPTable()
 	local scratchPadStr = pickle(SCPTable)
 	reaper.SetProjExtState(0, ScriptName, "SCPTable", scratchPadStr)
-end
-
-function CreateSCPEntry(name, markerIdx, startTime, endTime, cursorPos, active)
-	return { name, markerIdx, startTime, endTime, cursorPos, active }
 end
 
 function ReadSCPTable()
@@ -36,7 +36,7 @@ function AddScratchPad(name)
 	end
 
 	local slotStart = scratchPadTime + ((slot - 1) * slotLength)
-	local slotEnd = scratchPadTime + ((slot - 1) * slotLength) + slotLength
+	local slotEnd = scratchPadTime + (((slot - 1) * slotLength) + slotLength) - slotGap
 	local markerName = ScratchMarkerPrefix .. ': ' .. name
 	local markerIdx = reaper.AddProjectMarker(0, true, slotStart, slotEnd, markerName, 0)
 	SCPTable[slot] = CreateSCPEntry(name, markerIdx, slotStart, slotEnd, slotStart, false)
@@ -49,13 +49,13 @@ function DeleteScratchPad(slot)
 	reaper.DeleteProjectMarker(0, SCPTable[slot][2], true)
 	SCPTable[slot] = 0
 
-	local slots = 0
+	local slotCount = 0
 	for _, v in pairs(SCPTable) do
 		if v ~= 0 then
-			slots = slots + 1
+			slotCount = slotCount + 1
 		end
 	end
-	if slots == 1 then -- no slots
+	if slotCount == 1 then -- no slots
 		Jump(1)
 	end
 	WriteSCPTable()
@@ -72,15 +72,14 @@ end
 
 local function isCursorInSlot(slot)
 	local curPos = reaper.GetCursorPosition()
-	local slotStart, slotEnd
-	slotStart, slotEnd = MakeTimeFromSlot(slot)
+	local slotStart, slotEnd = GetSlotBoundary(slot)
 	if (curPos >= slotStart) and (curPos <= slotEnd) then
 		return true
 	end
 	return false
 end
 
-local function saveCursorPosition(slot)
+local function saveCursorPositionInSlot(slot)
 	if (SCPTable[slot] ~= 0) then
 		local curPos = reaper.GetCursorPosition()
 		SCPTable[slot][5] = curPos
@@ -88,7 +87,7 @@ local function saveCursorPosition(slot)
 	end
 end
 
-function SetActiveSlot(slot)
+function ActivateSlot(slot)
 	for _, v in pairs(SCPTable) do
 		if v ~= 0 then
 			v[6] = false -- unactivate everything
@@ -100,10 +99,10 @@ end
 function Jump(slot)
 	if (GetCurrentSlot() == slot) then return end
 	if (isCursorInSlot(GetCurrentSlot()) == true) then
-		saveCursorPosition(GetCurrentSlot())
+		saveCursorPositionInSlot(GetCurrentSlot())
 	end
 	reaper.SetEditCurPos(SCPTable[slot][5], true, false)
-	SetActiveSlot(slot)
+	ActivateSlot(slot)
 	WriteSCPTable()
 end
 
@@ -114,14 +113,14 @@ function CheckSCPEmpty(tbl)
 	return false
 end
 
-function MakeTimeFromSlot(slot)
+function GetSlotBoundary(slot)
 	local slotStart = SCPTable[slot][3]
 	local slotEnd = SCPTable[slot][4]
-	return slotStart, slotEnd - slotGap
+	return slotStart, slotEnd
 end
 
 function getSlotItemsTimeMax(slot)
-	local slotStart, slotEnd = MakeTimeFromSlot(slot)
+	local slotStart, slotEnd = GetSlotBoundary(slot)
 	local maxTime = slotStart
 	for t = 0, reaper.CountTracks(0) - 1 do
 		local track = reaper.GetTrack(0, t)
@@ -186,95 +185,4 @@ function CopyMediaItemToTrack(item, track, position)
 	reaper.SetMediaItemInfo_Value(new_item, "D_POSITION", position)
 	reaper.PreventUIRefresh(-1)
 	return new_item
-end
-
---------------------------------------------------------------------------------
--- Pickle table serialization - Steve Dekorte, http://www.dekorte.com, Apr 2000
---------------------------------------------------------------------------------
-function pickle(t)
-	return Pickle:clone():pickle_(t)
-end
-
---------------------------------------------------------------------------------
-Pickle = {
-	clone = function(t)
-		local nt = {}
-		for i, v in pairs(t) do
-			nt[i] = v
-		end
-		return nt
-	end
-}
---------------------------------------------------------------------------------
-function Pickle:pickle_(root)
-	if type(root) ~= "table" then
-		error("can only pickle tables, not " .. type(root) .. "s")
-	end
-	self._tableToRef = {}
-	self._refToTable = {}
-	local savecount = 0
-	self:ref_(root)
-	local s = ""
-	while #self._refToTable > savecount do
-		savecount = savecount + 1
-		local t = self._refToTable[savecount]
-		s = s .. "{\n"
-		for i, v in pairs(t) do
-			s = string.format("%s[%s]=%s,\n", s, self:value_(i), self:value_(v))
-		end
-		s = s .. "},\n"
-	end
-	return string.format("{%s}", s)
-end
-
---------------------------------------------------------------------------------
-function Pickle:value_(v)
-	local vtype = type(v)
-	if vtype == "string" then
-		return string.format("%q", v)
-	elseif vtype == "number" then
-		return v
-	elseif vtype == "boolean" then
-		return tostring(v)
-	elseif vtype == "table" then
-		return "{" .. self:ref_(v) .. "}"
-	else
-		error("pickle a " .. type(v) .. " is not supported")
-	end
-end
-
---------------------------------------------------------------------------------
-function Pickle:ref_(t)
-	local ref = self._tableToRef[t]
-	if not ref then
-		if t == self then error("can't pickle the pickle class") end
-		table.insert(self._refToTable, t)
-		ref = #self._refToTable
-		self._tableToRef[t] = ref
-	end
-	return ref
-end
-
---------------------------------------------------------------------------------
--- unpickle
---------------------------------------------------------------------------------
-function unpickle(s)
-	if type(s) ~= "string" then
-		error("can't unpickle a " .. type(s) .. ", only strings")
-	end
-	local gentables = load("return " .. s)
-	local tables = gentables()
-	for tnum = 1, #tables do
-		local t = tables[tnum]
-		local tcopy = {}
-		for i, v in pairs(t) do tcopy[i] = v end
-		for i, v in pairs(tcopy) do
-			local ni, nv
-			if type(i) == "table" then ni = tables[i[1]] else ni = i end
-			if type(v) == "table" then nv = tables[v[1]] else nv = v end
-			t[i] = nil
-			t[ni] = nv
-		end
-	end
-	return tables[1]
 end
