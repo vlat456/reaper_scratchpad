@@ -1,4 +1,4 @@
--- @version 0.1a
+-- @noindex
 
 dofile(SCRIPT_PATH .. "globals.lua")
 
