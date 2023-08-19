@@ -1,4 +1,4 @@
--- @version 0.1a
+-- @version 0.11a
 -- @author vlat456
 -- @description Quick and dirty Scratchpad implementation for Reaper
 -- @changelog Initial alpha release
