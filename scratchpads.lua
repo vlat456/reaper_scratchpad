@@ -5,6 +5,7 @@
 -- @provides functions.lua
 --           globals.lua
 --           gui.lua
+-- @changelog Initial alpha release
 
 local info = debug.getinfo(1, 'S');
 SCRIPT_PATH = info.source:match [[^@?(.*[\/])[^\/]-$]]
