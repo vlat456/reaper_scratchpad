@@ -4,7 +4,7 @@
     <reapack name="scratchpads.lua" type="script" desc="Quick and dirty Scratchpad implementation for Reaper">
       <version name="0.1a" author="vlat456" time="2023-08-19T17:58:32Z">
         <changelog><![CDATA[Initial alpha release]]></changelog>
-        <source main="main">https://github.com/vlat456/reaper_scratchpad/raw/devel/scratchpad/scratchpads.lua</source>
+        <source main="main">https://github.com/vlat456/reaper_stuff/raw/devel/scratchpad/scratchpads.lua</source>
       </version>
     </reapack>
   </category>
